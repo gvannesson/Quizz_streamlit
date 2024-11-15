@@ -4,11 +4,16 @@ import os
 from pydantic import BaseModel, field_validator, model_validator, ValidationError
 from typing import List
 
+number_list = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eigth"]
+
 st.markdown("# Création d'un quiz🎉")
 st.sidebar.markdown("# Créer un quiz 🎉")
 
 if 'reset' not in st.session_state:
     st.session_state.reset = False
+
+# if 'answer_number' not in st.session_state:
+#     st.session_state.answer_number = 0
 
 # Clear input fields by checking the reset flag
 if st.session_state.reset:
@@ -62,14 +67,30 @@ class Quiz(BaseModel):
 
 question = st.text_input('Type a question', key="question")
 answer_number = st.text_input('Type a number of possible answers', key="answer_number")
-number_list = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eigth"]
-for i in range(answer_number):
-    st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
-# answer_1 = st.text_input('Type the first possible answer', key="answer_1")
-# answer_2 = st.text_input('Type the second possible answer', key="answer_2")
-# answer_3 = st.text_input('Type the third possible answer', key="answer_3")
-# answer_4 = st.text_input('Type the fourth possible answer', key="answer_4")
-good_answer = st.text_input('Type the number of the good answer', key="good_answer")
+
+if st.button("Valider le nombre de réponses à entrer"):
+    for i in range(int(answer_number)):
+        st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
+    # Store the number of answers in session_state
+    # if answer_number.isdigit():  # Make sure it's a valid number
+    #     list_answer = []
+    #     for i in range(int(answer_number)):
+    #         st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
+    #         list_answer.append(st.session_state[f"answer_{i}"])
+    # else:
+    #     st.warning("Please enter a valid number.")
+
+
+
+# if st.session_state.answer_number > 0:
+#     for i in range(int(answer_number)):
+#         st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
+    # answer_1 = st.text_input('Type the first possible answer', key="answer_1")
+    # answer_2 = st.text_input('Type the second possible answer', key="answer_2")
+    # answer_3 = st.text_input('Type the third possible answer', key="answer_3")
+    # answer_4 = st.text_input('Type the fourth possible answer', key="answer_4")
+    
+    good_answer = st.text_input('Type the number of the good answer', key="good_answer")
 
 
 if st.button('Save your question'):
