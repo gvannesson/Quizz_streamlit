@@ -37,11 +37,15 @@ if 'reset' not in st.session_state:
 if st.session_state.reset:
     st.session_state["question"] = ''
     for i in range(int(st.session_state.answer_number)):
-        st.session_state[f"answer_{i}"] = st.write(f"réponse {i}")
+        st.session_state[f"answer_{i}"] = ""
     st.session_state.answer_number =''
     st.session_state["good_answer"] = ''
     # Set the reset flag back to False
     st.session_state.reset = False
+    st.session_state.submit = False
+    st.session_state.flag = False
+    st.session_state.flag_boucle = False
+    st.session_state.list_answer = []
 
 
 class Quiz(BaseModel):
@@ -56,13 +60,13 @@ class Quiz(BaseModel):
             raise ValueError("La question ne peut pas être vide.")
         return value
 
-    @field_validator('answers')
-    def validate_answers(cls, value):
-        if len(value) != 4:
-            raise ValueError("Il faut exactement 4 réponses possibles.")
-        if any(not answer for answer in value):
-            raise ValueError("Toutes les réponses doivent être renseignées.")
-        return value
+    # @field_validator('answers')
+    # def validate_answers(cls, value):
+    #     if len(value) != 4:
+    #         raise ValueError("Il faut exactement 4 réponses possibles.")
+    #     if any(not answer for answer in value):
+    #         raise ValueError("Toutes les réponses doivent être renseignées.")
+    #     return value
 
     @field_validator('good_answer')
     def validate_good_answer(cls, value):
@@ -75,9 +79,9 @@ class Quiz(BaseModel):
     def check_all_fields(cls, values):
         if not values.get('question'):
             raise ValueError("La question ne peut pas être vide.")
-        if len(values['answers']) != 4:
-            raise ValueError("Il faut exactement 4 réponses possibles.")
-        if values["good_answer"] not in [str(i) for i in range(st.session_state.answer_number)]:
+        if len(values['answers']) != int(st.session_state.answer_number):
+            raise ValueError(f"Il faut exactement 4  {len(values['answers'])} réponses possibles.")
+        if values["good_answer"] not in [str(i) for i in range(int(st.session_state.answer_number))]:
             raise ValueError("La réponse correcte doit être un nombre entre 1 et 4.")
         return values
 
@@ -101,7 +105,6 @@ if st.session_state.flag:
             good_answer = st.text_input('Type the number of the good answer', key="good_answer")
             st.session_state.submit = st.form_submit_button("bouton de submit")
         if st.session_state.submit:
-            st.write('submit')
             # if st.button('Save your question'):
 # with open('quiz_data.json', 'w') as file:
 #     json.dump({"Question :" : question, "Answers :" : [answer_1,answer_2,answer_3,answer_4], "good_answer :" : good_answer}, file)
@@ -109,99 +112,36 @@ if st.session_state.flag:
 
                 # st.rerun()
 
-                # try:
-                #     # Valider l'objet Quiz avec les données saisies
-                #     quiz_data = Quiz(
-                #         question=question,
-                #         answers=[st.session_state[f"answer{i}"] for i in range(st.session_state.answer_number)],
-                #         good_answer=good_answer
-                #     )
-            print('saved')
-            if os.path.exists('quiz_data.json'):
-            # Open the file and load the existing data
-                with open('quiz_data.json', 'r') as file:
-                    data = json.load(file)
+            try:
+                # Valider l'objet Quiz avec les données saisies
+                quiz_data = Quiz(
+                    question=question,
+                    answers=[st.session_state[f"answer_{i}"] for i in range(int(st.session_state.answer_number))],
+                    good_answer=good_answer
+                )
+                if os.path.exists('quiz_data.json'):
+                # Open the file and load the existing data
+                    with open('quiz_data.json', 'r') as file:
+                        data = json.load(file)
+                    
+                    # Add the new question to the data (assuming it's a list of questions)
+                    data.append({"Question :" : question, "Answers :" : [st.session_state[f"answer_{i}"] for i in range(int(st.session_state.answer_number))], "good_answer :" : good_answer})
+                else:
+                    # If the file doesn't exist, start with an empty list
+                    data = [{"Question :" : question, "Answers :" : [st.session_state[f"answer_{i}"] for i in range(int(st.session_state.answer_number))], "good_answer :" : good_answer}]
+
+                # Write the updated data back to the JSON file
+                with open('quiz_data.json', 'w') as file:
+                    json.dump(data, file, indent=4)
                 
-                # Add the new question to the data (assuming it's a list of questions)
-                data.append({"Question :" : question, "Answers :" : [st.session_state[f"answer_{i}"] for i in range(int(st.session_state.answer_number))], "good_answer :" : good_answer})
-            else:
-                # If the file doesn't exist, start with an empty list
-                data = [{"Question :" : question, "Answers :" : [st.session_state[f"answer_{i}"] for i in range(int(st.session_state.answer_number))], "good_answer :" : good_answer}]
+                st.session_state.reset = True
 
-            # Write the updated data back to the JSON file
-            with open('quiz_data.json', 'w') as file:
-                json.dump(data, file, indent=4)
-            
-            st.session_state.reset = True
+                st.rerun()
 
-            st.rerun()
-
-                # except ValidationError as e:
-                #     # Afficher les erreurs de validation
-                #     st.error(f"Erreur de validation : {e}")
-                #     st.session_state.flag_boucle=True
-    # if st.session_state.flag_boucle:
-    #     for i in range(int(answer_number)):
-    #         st.session_state.list_answer
+            except ValidationError as e:
+                # Afficher les erreurs de validation
+                st.error(f"Erreur de validation : {e}")
+                st.session_state.flag_boucle=True
 
 
-
-
-
-    # Store the number of answers in session_state
-    # if answer_number.isdigit():  # Make sure it's a valid number
-    #     list_answer = [a, b,c, d]
-    #     for i in range(int(answer_number)):
-    #         st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
-    #         list_answer.append(st.session_state[f"answer_{i}"])
-    # else:
-    #     st.warning("Please enter a valid number.")
-
-
-
-# if st.session_state.answer_number > 0:
-#     for i in range(int(answer_number)):
-#         st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
-    # answer_1 = st.text_input('Type the first possible answer', key="answer_1")
-    # answer_2 = st.text_input('Type the second possible answer', key="answer_2")
-    # answer_3 = st.text_input('Type the third possible answer', key="answer_3")
-    # answer_4 = st.text_input('Type the fourth possible answer', key="answer_4")
-    
-    # good_answer = st.text_input('Type the number of the good answer', key="good_answer")
-
-
-# if st.button('Save your question'):
-#     # with open('quiz_data.json', 'w') as file:
-#     #     json.dump({"Question :" : question, "Answers :" : [answer_1,answer_2,answer_3,answer_4], "good_answer :" : good_answer}, file)
-
-#     try:
-#         # Valider l'objet Quiz avec les données saisies
-#         quiz_data = Quiz(
-#             question=question,
-#             answers=[answer_1, answer_2, answer_3, answer_4],
-#             good_answer=good_answer
-#         )
-
-#         if os.path.exists('quiz_data.json'):
-#         # Open the file and load the existing data
-#             with open('quiz_data.json', 'r') as file:
-#                 data = json.load(file)
-            
-#             # Add the new question to the data (assuming it's a list of questions)
-#             data.append({"Question :" : question, "Answers :" : [answer_1,answer_2,answer_3,answer_4], "good_answer :" : good_answer})
-#         else:
-#             # If the file doesn't exist, start with an empty list
-#             data = [{"Question :" : question, "Answers :" : [answer_1,answer_2,answer_3,answer_4], "good_answer :" : good_answer}]
-
-#         # Write the updated data back to the JSON file
-#         with open('quiz_data.json', 'w') as file:
-#             json.dump(data, file, indent=4)
-        
-#         st.session_state.reset = True
-
-#         st.rerun()
-
-#     except ValidationError as e:
-#         # Afficher les erreurs de validation
-#         st.error(f"Erreur de validation : {e}")
 
