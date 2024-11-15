@@ -9,6 +9,15 @@ number_list = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh"
 st.markdown("# Création d'un quiz🎉")
 st.sidebar.markdown("# Créer un quiz 🎉")
 
+if "flag" not in st.session_state:
+    st.session_state.flag = False
+
+if "flag_boucle" not in st.session_state:
+    st.session_state.flag_boucle = False
+
+if "answer_0" in st.session_state:
+    st.session_state.answer_0 = st.write("bonjour")
+
 if 'reset' not in st.session_state:
     st.session_state.reset = False
 
@@ -68,12 +77,26 @@ class Quiz(BaseModel):
 question = st.text_input('Type a question', key="question")
 answer_number = st.text_input('Type a number of possible answers', key="answer_number")
 
-if st.button("Valider le nombre de réponses à entrer"):
-    for i in range(int(answer_number)):
-        st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
+
+if not st.session_state.flag:
+    if st.button("Valider le nombre de réponses à entrer"):
+        st.session_state.flag = True
+        st.rerun()
+
+if st.session_state.flag:
+    list_answer = []
+    if not st.session_state.flag_boucle:
+        for i in range(int(answer_number)):
+            list_answer.append(st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}"))
+        for i in range(int(answer_number)):
+            list_answer[i]
+        st.session_state.flag_boucle=True
+
+
+
     # Store the number of answers in session_state
     # if answer_number.isdigit():  # Make sure it's a valid number
-    #     list_answer = []
+    #     list_answer = [a, b,c, d]
     #     for i in range(int(answer_number)):
     #         st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
     #         list_answer.append(st.session_state[f"answer_{i}"])
