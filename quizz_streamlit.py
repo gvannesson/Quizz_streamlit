@@ -61,14 +61,14 @@ class Quiz(BaseModel):
 
 
 question = st.text_input('Type a question', key="question")
-# answer_number = st.text_input('Type a number of possible answers', key="answer_number")
-# number_list = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eigth"]
-# for i in range(answer_number):
-# st
-answer_1 = st.text_input('Type the first possible answer', key="answer_1")
-answer_2 = st.text_input('Type the second possible answer', key="answer_2")
-answer_3 = st.text_input('Type the third possible answer', key="answer_3")
-answer_4 = st.text_input('Type the fourth possible answer', key="answer_4")
+answer_number = st.text_input('Type a number of possible answers', key="answer_number")
+number_list = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eigth"]
+for i in range(answer_number):
+    st.text_input(f'Type the {number_list[i]} possible answer', key=f"answer_{i}")
+# answer_1 = st.text_input('Type the first possible answer', key="answer_1")
+# answer_2 = st.text_input('Type the second possible answer', key="answer_2")
+# answer_3 = st.text_input('Type the third possible answer', key="answer_3")
+# answer_4 = st.text_input('Type the fourth possible answer', key="answer_4")
 good_answer = st.text_input('Type the number of the good answer', key="good_answer")
 
 
